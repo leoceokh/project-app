@@ -54,9 +54,9 @@ def train_model(X, y, test_size, k_neighbors):
 def plot_correlation(data, features, target):
     corr_data = data[features + [target]].corr()
     fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(corr_data, annot=True, cmap='coolwarm', ax=ax)
-    plt.xticks(rotation=45)  # x축 레이블 회전
-    plt.yticks(rotation=45)  # y축 레이블 회전
+    sns.heatmap(corr_data, annot=True, cmap='coolwarm', ax=ax, fmt=".2f", cbar_kws={"shrink": .8})
+    plt.xticks(rotation=45, ha='right')  # x축 레이블 회전 및 정렬
+    plt.yticks(rotation=0)  # y축 레이블 회전
     plt.tight_layout()  # 레이아웃 조정
     return fig
 
