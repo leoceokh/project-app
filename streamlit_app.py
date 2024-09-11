@@ -7,10 +7,10 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 import os
 import chardet
-from PIL import Image
-import io
+import warnings
 
-st.set_option('deprecation.showPyplotGlobalUse', False)
+# Matplotlib 경고 무시
+warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 
 def load_data():
     file_path = 'kimchi_data.csv'
@@ -47,11 +47,11 @@ def train_model(X, y, test_size, k_neighbors):
 
 def plot_correlation(data, features, target):
     corr_data = data[features + [target]].corr()
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(corr_data, annot=True, cmap='coolwarm', fmt=".2f", cbar_kws={"shrink": .8})
+    fig, ax = plt.subplots(figsize=(10, 8))
+    sns.heatmap(corr_data, annot=True, cmap='coolwarm', fmt=".2f", cbar_kws={"shrink": .8}, ax=ax)
     plt.title("Correlation Heatmap")
     plt.tight_layout()
-    return plt
+    return fig
 
 def main():
     st.title("Machine Learning Application for Kimchi Ingredient Prediction")
