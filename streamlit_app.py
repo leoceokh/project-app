@@ -7,8 +7,9 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 import os
 import chardet
+from PIL import Image
+import io
 
-# Streamlit 버전 출력
 st.write(f"Streamlit version: {st.__version__}")
 
 def load_data():
@@ -32,9 +33,10 @@ def load_data():
                 continue
             st.success(f"Successfully loaded data with {encoding} encoding.")
             
-            # 데이터프레임의 열 이름과 개수 출력
-            st.write(f"Columns in the dataframe: {df.columns.tolist()}")
-            st.write(f"Number of columns: {len(df.columns)}")
+            # 열 이름을 영어로 변경
+            df.columns = ['year', 'month', 'avg_temp', 'avg_max_temp', 'max_temp', 'avg_min_temp', 'min_temp',
+                          'avg_monthly_rain', 'max_monthly_rain', 'max_hourly_rain',
+                          'cabbage_price', 'radish_price', 'pepper_price', 'garlic_price', 'green_onion_price']
             
             return df
         except UnicodeDecodeError:
@@ -65,7 +67,14 @@ def plot_correlation(data, features, target):
     plt.xticks(rotation=45, ha='right')
     plt.yticks(rotation=0)
     plt.tight_layout()
-    return fig
+    
+    # 이미지로 변환
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    img = Image.open(buf)
+    plt.close(fig)
+    return img
 
 def main():
     st.title("Machine Learning Application for Kimchi Ingredient Prediction")
@@ -80,11 +89,10 @@ def main():
     test_size = st.sidebar.slider('Test Data Ratio', 0.1, 0.5, 0.2)
     k_neighbors = st.sidebar.slider('Number of Neighbors for K-NN Model', 1, 20, 5)
 
-    # 데이터프레임의 실제 열 이름을 사용
-    input_features = kimchi_data.columns.tolist()[2:-5]  # 연도와 월을 제외하고, 마지막 5개 열(가격)을 제외
+    input_features = kimchi_data.columns.tolist()[2:-5]
     selected_features = st.multiselect("Select features for prediction", input_features, default=input_features[:3])
 
-    target_options = kimchi_data.columns.tolist()[-5:]  # 마지막 5개 열을 타겟 옵션으로 사용
+    target_options = kimchi_data.columns.tolist()[-5:]
     target_column = st.selectbox("Select target variable for prediction", target_options)
 
     X = kimchi_data[selected_features]
@@ -109,8 +117,8 @@ def main():
 
         st.header("Data Visualization")
         st.write("Correlation between selected features and target variable:")
-        fig = plot_correlation(kimchi_data, selected_features, target_column)
-        st.pyplot(fig)
+        img = plot_correlation(kimchi_data, selected_features, target_column)
+        st.image(img)
 
     except Exception as e:
         st.error(f"Error occurred during model training or prediction: {str(e)}")
