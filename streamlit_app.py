@@ -16,7 +16,7 @@ from matplotlib import font_manager, rc
 
 @st.cache_data
 def load_data():
-    file_path = 'data/kimchi_data.csv'
+    file_path = 'kimchi_data.csv'
     if not os.path.exists(file_path):
         st.error(f"파일을 찾을 수 없습니다: {file_path}")
         return None
