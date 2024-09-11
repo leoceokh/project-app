@@ -45,6 +45,10 @@ def load_data():
     return None
 
 def train_model(X, y, test_size, k_neighbors):
+    if X.empty or y.empty:
+        st.error("특성 또는 타겟 데이터가 비어있습니다.")
+        return None, None, None, None
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=77)
     model = KNeighborsRegressor(n_neighbors=k_neighbors)
     model.fit(X_train, y_train)
