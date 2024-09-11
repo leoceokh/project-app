@@ -7,16 +7,10 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 import os
 import chardet
-from matplotlib import font_manager, rc
-
-# 한글 폰트 설정
-# font_path = "C:/Windows/Fonts/malgun.ttf"
-# font_manager.fontManager.addfont(font_path)
-# rc('font', family='Malgun Gothic')
 
 @st.cache_data
 def load_data():
-    file_path = 'kimchi_data.csv'
+    file_path = 'kimchi_data.csv'  # 파일 경로 확인
     if not os.path.exists(file_path):
         st.error(f"파일을 찾을 수 없습니다: {file_path}")
         return None
