@@ -10,9 +10,9 @@ import chardet
 from matplotlib import font_manager, rc
 
 # 한글 폰트 설정
-font_path = "C:/Windows/Fonts/malgun.ttf"
-font_manager.fontManager.addfont(font_path)
-rc('font', family='Malgun Gothic')
+# font_path = "C:/Windows/Fonts/malgun.ttf"
+# font_manager.fontManager.addfont(font_path)
+# rc('font', family='Malgun Gothic')
 
 @st.cache_data
 def load_data():
