@@ -1,17 +1,3 @@
-import streamlit as st
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.metrics import mean_squared_error, r2_score
-import os
-import chardet
-from PIL import Image
-import io
-
-st.write(f"Streamlit version: {st.__version__}")
-
 def load_data():
     file_path = 'kimchi_data.csv'
     if not os.path.exists(file_path):
@@ -33,10 +19,22 @@ def load_data():
                 continue
             st.success(f"Successfully loaded data with {encoding} encoding.")
             
-            # 열 이름을 영어로 변경
-            df.columns = ['year', 'month', 'avg_temp', 'avg_max_temp', 'max_temp', 'avg_min_temp', 'min_temp',
-                          'avg_monthly_rain', 'max_monthly_rain', 'max_hourly_rain',
-                          'cabbage_price', 'radish_price', 'pepper_price', 'garlic_price', 'green_onion_price']
+            # 열 이름 출력
+            st.write("Original column names:", df.columns.tolist())
+            st.write(f"Number of columns: {len(df.columns)}")
+            
+            # 열 이름을 영어로 변경 (실제 열 개수에 맞게 조정)
+            english_columns = ['year', 'month', 'avg_temp', 'avg_max_temp', 'max_temp', 'avg_min_temp', 'min_temp',
+                               'avg_monthly_rain', 'max_monthly_rain', 'max_hourly_rain']
+            
+            # 나머지 열은 자동으로 이름 생성
+            for i in range(len(df.columns) - len(english_columns)):
+                english_columns.append(f'column_{i+1}')
+            
+            df.columns = english_columns
+            
+            # 새로운 열 이름 출력
+            st.write("New column names:", df.columns.tolist())
             
             return df
         except UnicodeDecodeError:
@@ -47,82 +45,22 @@ def load_data():
     st.error("All encoding attempts failed. Please check the file format and content.")
     return None
 
-def train_model(X, y, test_size, k_neighbors):
-    if X.empty or y.empty:
-        st.error("Feature or target data is empty.")
-        return None, None, None, None
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=77)
-    model = KNeighborsRegressor(n_neighbors=k_neighbors)
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    mse = mean_squared_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    return model, mse, r2, X_test
-
-def plot_correlation(data, features, target):
-    corr_data = data[features + [target]].corr()
-    fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(corr_data, annot=True, cmap='coolwarm', ax=ax, fmt=".2f", cbar_kws={"shrink": .8})
-    plt.xticks(rotation=45, ha='right')
-    plt.yticks(rotation=0)
-    plt.tight_layout()
-    
-    # 이미지로 변환
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    img = Image.open(buf)
-    plt.close(fig)
-    return img
-
+# main() 함수 내부의 관련 부분 수정
 def main():
-    st.title("Machine Learning Application for Kimchi Ingredient Prediction")
-
+    # ... (이전 코드)
+    
     kimchi_data = load_data()
     if kimchi_data is None:
         st.stop()
 
     st.write("Kimchi dataset preview:", kimchi_data.head())
 
-    st.sidebar.header('Model Parameters')
-    test_size = st.sidebar.slider('Test Data Ratio', 0.1, 0.5, 0.2)
-    k_neighbors = st.sidebar.slider('Number of Neighbors for K-NN Model', 1, 20, 5)
-
-    input_features = kimchi_data.columns.tolist()[2:-5]
+    # 동적으로 입력 특성과 타겟 변수 선택
+    all_columns = kimchi_data.columns.tolist()[2:]  # 연도와 월을 제외한 모든 열
+    input_features = all_columns[:-5]  # 마지막 5개 열을 제외한 나머지를 입력 특성으로 사용
     selected_features = st.multiselect("Select features for prediction", input_features, default=input_features[:3])
 
-    target_options = kimchi_data.columns.tolist()[-5:]
+    target_options = all_columns[-5:]  # 마지막 5개 열을 타겟 옵션으로 사용
     target_column = st.selectbox("Select target variable for prediction", target_options)
 
-    X = kimchi_data[selected_features]
-    y = kimchi_data[target_column]
-
-    if X.empty or y.empty:
-        st.error("Feature or target data is empty.")
-        st.stop()
-
-    try:
-        model, mse, r2, X_test = train_model(X, y, test_size, k_neighbors)
-
-        st.write(f"Model Mean Squared Error (MSE): {mse:.2f}")
-        st.write(f"Coefficient of Determination (R^2): {r2:.2f}")
-
-        st.sidebar.header('New Data Prediction')
-        user_input = {feature: st.sidebar.number_input(f'{feature}', value=X[feature].mean()) for feature in selected_features}
-
-        if st.sidebar.button('Run Prediction'):
-            prediction = model.predict(pd.DataFrame([user_input]))
-            st.sidebar.write(f"Predicted {target_column}: {prediction[0]:.2f}")
-
-        st.header("Data Visualization")
-        st.write("Correlation between selected features and target variable:")
-        img = plot_correlation(kimchi_data, selected_features, target_column)
-        st.image(img)
-
-    except Exception as e:
-        st.error(f"Error occurred during model training or prediction: {str(e)}")
-        st.stop()
-
-if __name__ == "__main__":
-    main()
+    # ... (나머지 코드)
