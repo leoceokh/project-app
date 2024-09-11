@@ -106,13 +106,4 @@ def main():
             st.sidebar.write(f"예측된 {target_column}: {prediction[0]:.2f}")
 
         st.header("데이터 시각화")
-        st.write("선택된 특성과 타겟 변수 간의 상관관계:")
-        fig = plot_correlation(kimchi_data, selected_features, target_column)
-        st.pyplot(fig)
-
-    except Exception as e:
-        st.error(f"모델 훈련 또는 예측 중 오류 발생: {str(e)}")
-        st.stop()
-
-if __name__ == "__main__":
-    main()
+        st.write("선택된 특성과 타겟 변수 간의
